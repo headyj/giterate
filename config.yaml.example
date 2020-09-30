@@ -1,0 +1,53 @@
+---
+- BaseURL: https://gitlab.*****.com
+  API: gitlab
+  ApiURI: "/api/v4"
+  ApiToken: "******"
+  CloneType: ssh
+  SSHPrivateKeyPath: "/home/usr/.ssh/id_rsa"
+  Destination: "/home/usr/giterate/gitlab"
+  Entities:
+  - Type: repository
+    Path: link/to/repository
+    Name: repository_name
+    Destination: "/home/usr/giterate/openjdk"
+    CloneOptions:
+    - Name: RemoteName
+      Value: master
+  - Type: group
+    Path: link/to/group
+    Name: group_name
+    Recurse: true
+- BaseURL: https://git.*****.com
+  API: bitbucketv1
+  ApiURI: "/rest"
+  CloneType: http
+  Username: usr
+  Password: "*****"
+  Destination: "/home/usr/giterate/bitbucketv1"
+  Entities:
+  - Type: repository
+    Path: group_name
+    Name: repository_name
+    Destination: "/home/usr/giterate/bitbucketv1/repository_name"
+  - Type: group
+    Name: group_name
+- BaseURL: https://api.bitbucket.org
+  API: bitbucketv2
+  ApiURI: "/2.0"
+  CloneType: ssh
+  Username: usr
+  SSHPrivateKeyPath: "/home/usr/.ssh/id_rsa"
+  Password: "*****"
+  Destination: "/home/usr/giterate/bitbucketv2"
+  Entities:
+  - Type: group
+    Name: group_name
+- BaseURL: https://github.com
+  API: github
+  ApiURI: "/2.0"
+  CloneType: none
+  Destination: "/home/usr/giterate/github"
+  Entities:
+  - Type: group
+    Name: group_name

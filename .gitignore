@@ -1,0 +1,6 @@
+giterate
+.DS_Store
+.vscode
+__debug_bin
+*.json
+*.yaml
