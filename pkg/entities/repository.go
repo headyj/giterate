@@ -38,7 +38,7 @@ func PopulateRepositories(services []Service) []Service {
 				}
 			case "repository":
 				repositoryInfo := gitClient.GetRepository(jsonEntity.Path, jsonEntity.Name, service.CloneType)
-				repository := NewRepository(&service, repositoryInfo.URL, jsonEntity.Destination, "", jsonEntity.CloneOptions)
+				repository := NewRepository(&service, repositoryInfo.URL, jsonEntity.Destination, repositoryInfo.Path, jsonEntity.CloneOptions)
 				UpdateRepositories(&repositories, repository)
 			default:
 				log.Fatalf("%s is not a valid Type", jsonEntity.Type)

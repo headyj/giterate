@@ -27,10 +27,10 @@ Each git provider will have the same available parameters:
 You can find an example of configuration file on this repository
 
 ## Available services
-- Gitlab
-- Bitbucket V1
-- Bitbucket V2
-- Github
+- Gitlab (https://www.github.com/xanzy/go-gitlab)
+- Bitbucket V1 (https://www.github.com/gfleury/go-bitbucket-v1)
+- Bitbucket V2 (https://www.github.com/ktrysmt/go-bitbucket)
+- Github (https://www.github.com/google/go-github/github)
 
 ## Available commands
 - [x] clone: clone repositories according to configuration file
@@ -61,7 +61,7 @@ You can find an example of configuration file on this repository
 - [x] --config-file: set json/yaml configuration file path
 
 ## Roadmap
-[ ] tests
-[ ] commit command
-[ ] push command
-[ ] implement parameters
+- [ ] tests
+- [ ] commit command
+- [ ] push command
+- [ ] implement parameters

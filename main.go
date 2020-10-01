@@ -14,7 +14,7 @@ func main() {
 		Args:     args,
 		Commands: Commands,
 		HelpFunc: cli.BasicHelpFunc("giterate"),
-		Version:  "0.1",
+		Version:  "0.2",
 	}
 
 	status, err := cli.Run()

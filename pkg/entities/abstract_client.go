@@ -9,7 +9,6 @@ import (
 
 	bitbucketv1 "github.com/gfleury/go-bitbucket-v1"
 	"github.com/google/go-github/github"
-	bitbucket "github.com/ktrysmt/go-bitbucket"
 	bitbucketv2 "github.com/ktrysmt/go-bitbucket"
 	"github.com/xanzy/go-gitlab"
 	"golang.org/x/oauth2"
@@ -34,7 +33,7 @@ type BitbucketClient struct {
 }
 
 type BitbucketClientV2 struct {
-	Client *bitbucket.Client
+	Client *bitbucketv2.Client
 }
 
 type GithubClient struct {
@@ -44,9 +43,15 @@ type GithubClient struct {
 // Gitlab
 func (gl GitlabClient) GetGroupRepositories(path string, name string, recurse bool, cloneType string) []RepositoryInfo {
 	var repositoriesInfo []RepositoryInfo
-	projects, _, err := gl.Client.Groups.ListGroupProjects(path+"/"+name, &gitlab.ListGroupProjectsOptions{ListOptions: gitlab.ListOptions{PerPage: 10000}, IncludeSubgroups: gitlab.Bool(recurse)})
+	var finalPath string
+	if path == "" {
+		finalPath = name
+	} else {
+		finalPath = path + "/" + name
+	}
+	projects, _, err := gl.Client.Groups.ListGroupProjects(finalPath, &gitlab.ListGroupProjectsOptions{ListOptions: gitlab.ListOptions{PerPage: 10000}, IncludeSubgroups: gitlab.Bool(recurse)})
 	if err != nil {
-		log.Fatalf("Failed to get group %s: %v", path+"/"+name, err)
+		log.Fatalf("Failed to get group %s: %v", finalPath, err)
 	}
 	for _, project := range projects {
 		var repositoryLink string
@@ -58,7 +63,6 @@ func (gl GitlabClient) GetGroupRepositories(path string, name string, recurse bo
 		repositoryInfo := RepositoryInfo{repositoryLink, project.PathWithNamespace}
 		repositoriesInfo = append(repositoriesInfo, repositoryInfo)
 	}
-
 	return repositoriesInfo
 }
 func (gl GitlabClient) GetRepository(path string, name string, cloneType string) RepositoryInfo {
@@ -141,7 +145,7 @@ func (bb BitbucketClient) GetRepository(path string, name string, cloneType stri
 			repositoryLink = links.Href
 		}
 	}
-	return RepositoryInfo{repositoryLink, repository.Slug}
+	return RepositoryInfo{repositoryLink, strings.ToLower(repository.Project.Key) + "/" + repository.Slug}
 }
 func BitbucketAuth(service Service) GitClient {
 	var git *bitbucketv1.APIClient
@@ -179,7 +183,7 @@ func (gh GithubClient) GetGroupRepositories(path string, name string, recurse bo
 		} else {
 			repositoryLink = repository.GetHTMLURL()
 		}
-		repositoryInfo := RepositoryInfo{repositoryLink, repository.GetName()}
+		repositoryInfo := RepositoryInfo{repositoryLink, repository.GetFullName()}
 		repositoriesInfo = append(repositoriesInfo, repositoryInfo)
 	}
 	return repositoriesInfo
@@ -195,7 +199,7 @@ func (gh GithubClient) GetRepository(path string, name string, cloneType string)
 	} else {
 		repositoryLink = repository.GetHTMLURL()
 	}
-	return RepositoryInfo{repositoryLink, repository.GetName()}
+	return RepositoryInfo{repositoryLink, repository.GetFullName()}
 }
 func GithubAuth(service Service) GitClient {
 	var git *github.Client
@@ -219,9 +223,9 @@ func GithubAuth(service Service) GitClient {
 
 //Bitbucket V2
 func (bb BitbucketClientV2) GetRepository(path string, name string, cloneType string) RepositoryInfo {
-	project := bitbucket.Project{Name: path}
-	repository := bitbucket.Repository{Slug: name, Project: project}
-	repository2, err := repository.Get(&bitbucket.RepositoryOptions{})
+	project := bitbucketv2.Project{Name: path}
+	repository := bitbucketv2.Repository{Slug: name, Project: project}
+	repository2, err := repository.Get(&bitbucketv2.RepositoryOptions{})
 	if err != nil {
 		log.Fatalf("Cannot get repository response: %s", err)
 	}
@@ -240,11 +244,11 @@ func (bb BitbucketClientV2) GetRepository(path string, name string, cloneType st
 			}
 		}
 	}
-	return RepositoryInfo{repositoryLink, repository.Slug}
+	return RepositoryInfo{repositoryLink, strings.ToLower(repository.Project.Key) + "/" + repository.Slug}
 }
 func (bb BitbucketClientV2) GetGroupRepositories(path string, name string, recurse bool, cloneType string) []RepositoryInfo {
 	var repositoriesInfo []RepositoryInfo
-	response, err := bb.Client.Repositories.ListForAccount(&bitbucket.RepositoriesOptions{Owner: name})
+	response, err := bb.Client.Repositories.ListForAccount(&bitbucketv2.RepositoriesOptions{Owner: name})
 	if err != nil {
 		log.Fatalf("Cannot get repositories response: %s", err)
 	}
