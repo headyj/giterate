@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"giterate/pkg/entities"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/user"
 	"path/filepath"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/go-yaml/yaml"
 )
@@ -19,19 +20,19 @@ func initConf(arguments *Arguments) []entities.Service {
 	if arguments.ConfigFile != "" {
 		_, configFile := os.Stat(arguments.ConfigFile)
 		if os.IsNotExist(configFile) {
-			log.Fatalf("Configuration file not found")
+			log.Fatalf("Configuration file not found\n")
 		}
 		configFilePath = arguments.ConfigFile
 	} else {
 		usr, err := user.Current()
 		if err != nil {
-			log.Fatalf("Cannot get current user:%s", err)
+			log.Fatalf("Cannot get current user:%s\n", err)
 		}
 		_, json := os.Stat(usr.HomeDir + "/" + ".giterate/config.json")
 		_, yaml := os.Stat(usr.HomeDir + "/" + ".giterate/config.yaml")
 		if os.IsNotExist(json) {
 			if os.IsNotExist(yaml) {
-				log.Fatalf("Configuration file not found")
+				log.Fatalf("Configuration file not found\n")
 			}
 			configFilePath = usr.HomeDir + "/" + ".giterate/config.yaml"
 		} else {
@@ -47,7 +48,17 @@ func initConf(arguments *Arguments) []entities.Service {
 		err = json.Unmarshal(file, &services)
 	}
 	if err != nil {
-		log.Fatalf("File cannot be parsed:%s", err)
+		log.Fatalf("Configuration file cannot be parsed:%s\n", err)
+	}
+	switch arguments.LogLevel {
+	case "error":
+		log.SetLevel(log.ErrorLevel)
+	case "warn", "warning":
+		log.SetLevel(log.WarnLevel)
+	case "debug":
+		log.SetLevel(log.DebugLevel)
+	default:
+		log.SetLevel(log.InfoLevel)
 	}
 	return services
 }

@@ -40,18 +40,22 @@ You can find an example of configuration file on this repository
 
 - [x] pull: pull repositories on current branches according to configuration file
     - if a new repository has been added to the configuration/to the git provider, it will not be cloned
-    - parameters
-        - [ ] --force: reset to configured branch
 
 - [x] status: check status of each git repositories according to configuration file
+    - parameters
+        - [x] --full: show status of all repositories, even if there's no uncommited changes
 
-- [ ] commit: check changes and ask for commit message in case of changes
+- [x] checkout: checkout the configured/default branch on all repositories
+    - parameters
+        - [x] --force: reset uncommited changes
+
+- [x] commit: check changes and ask for commit message in case of changes
     - if you don't provide any message, it will go to the next one without commiting
     - parameters
         - [ ] --target: target one or multiple repositories
-        - [ ] -m: define a single message for all commits (you'll have to answer "yes" instead of providing a message)
+        - [ ] -g, --global: define a single message for all commits (you'll have to answer "yes" instead of providing a message)
 
-- [ ] push: check commited changes and ask for push
+- [x] push: push commited changes
     - if you don't provide any message, it will go to the next one without commiting
     - parameters
         - [ ] --force: push without asking
@@ -59,9 +63,8 @@ You can find an example of configuration file on this repository
 
 ## Global parameters
 - [x] --config-file: set json/yaml configuration file path
+- [x] --log-level: set log level ("info", "warn", "error", "debug"). default: "info"
 
 ## Roadmap
-- [ ] tests
-- [ ] commit command
-- [ ] push command
-- [ ] implement parameters
+- implement tests
+- implement parameters

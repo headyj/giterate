@@ -1,11 +1,11 @@
 package command
 
 import (
-	"fmt"
 	"giterate/pkg/entities"
-	"log"
 	"os"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/go-git/go-git"
 	"github.com/go-git/go-git/plumbing/transport/http"
@@ -30,12 +30,12 @@ func (c *PullCommand) Help() string {
 Usage: giterate pull [options]
 
     Pull repositories on current branches according to configuration file
-	
-	By default, giterate will use config.json or config.yaml file (in this order) in ~/.giterate folder
+
+    By default, giterate will use config.json or config.yaml file (in this order) in ~/.giterate folder
 
 Options:
-	--config-file        set json/yaml configuration file path
-
+    --config-file        set json/yaml configuration file path
+    --log-level          set log level ("info", "warn", "error", "debug"). default: info
 
 `
 	return strings.TrimSpace(helpText)
@@ -51,7 +51,7 @@ func Pull(services []entities.Service) {
 		if service.SSHPrivateKeyPath != "" {
 			publicKeys, err := ssh.NewPublicKeysFromFile("git", service.SSHPrivateKeyPath, "")
 			if err != nil {
-				log.Fatalf("Cannot get public key: %s", err)
+				log.Fatalf("Cannot get public key: %s\n", err)
 			}
 			pullOptions.Auth = publicKeys
 		} else if service.Username != "" && service.Password != "" {
@@ -66,21 +66,21 @@ func Pull(services []entities.Service) {
 			}
 			r, err := git.PlainOpen(repository.Destination)
 			if err != nil {
-				log.Fatalf("Cannot open repository: %s", err)
+				log.Fatalf("Cannot open repository: %s\n", err)
 			}
 			w, err := r.Worktree()
 			if err != nil {
-				log.Fatalf("Cannot get worktree: %s", err)
+				log.Fatalf("Cannot get worktree: %s\n", err)
 			}
-			fmt.Println("[INFO] Pull " + repository.URL)
+			log.Infof("Pull %s\n", repository.URL)
 			err = w.Pull(&pullOptions)
 			switch err {
 			case git.NoErrAlreadyUpToDate:
 				continue
 			case git.ErrUnstagedChanges:
-				fmt.Println("[INFO] Repository contains unstaged changes, ignoring")
+				log.Info("Repository contains unstaged changes, ignoring\n")
 			default:
-				log.Fatalf("Cannot pull respository: %s", err)
+				log.Errorf("Cannot pull respository: %s. Ignoring\n", err)
 			}
 		}
 	}

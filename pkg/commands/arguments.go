@@ -2,6 +2,9 @@ package command
 
 type Arguments struct {
 	ConfigFile string
+	Full       bool
+	Force      bool
+	LogLevel   string
 }
 
 func (a *Arguments) process(args []string) *Arguments {
@@ -9,6 +12,12 @@ func (a *Arguments) process(args []string) *Arguments {
 		switch v {
 		case "--config-file":
 			a.ConfigFile = args[i+1]
+		case "--full":
+			a.Full = true
+		case "--force":
+			a.Force = true
+		case "--log-level":
+			a.LogLevel = args[i+1]
 		}
 	}
 	return a

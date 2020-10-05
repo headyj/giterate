@@ -5,9 +5,10 @@ import (
 )
 
 type Repository struct {
-	URL          string
-	Destination  string
-	CloneOptions []Option `json:"CloneOptions" yaml:"CloneOptions"`
+	URL           string
+	Destination   string
+	DefaultBranch string
+	CloneOptions  []Option `json:"CloneOptions" yaml:"CloneOptions"`
 }
 
 func PopulateRepositories(services []Service) []Service {
@@ -25,7 +26,7 @@ func PopulateRepositories(services []Service) []Service {
 		case "github":
 			gitClient = GithubAuth(service)
 		default:
-			log.Fatalf("%s is not a valid API", service.API)
+			log.Fatalf("%s is not a valid API\n", service.API)
 		}
 
 		for _, jsonEntity := range service.Entities {
@@ -33,15 +34,15 @@ func PopulateRepositories(services []Service) []Service {
 			case "group":
 				repositoriesInfo := gitClient.GetGroupRepositories(jsonEntity.Path, jsonEntity.Name, jsonEntity.Recurse, service.CloneType)
 				for _, repositoryInfo := range repositoriesInfo {
-					repository := NewRepository(&service, repositoryInfo.URL, jsonEntity.Destination, repositoryInfo.Path, jsonEntity.CloneOptions)
+					repository := NewRepository(&service, repositoryInfo, jsonEntity)
 					UpdateRepositories(&repositories, repository)
 				}
 			case "repository":
 				repositoryInfo := gitClient.GetRepository(jsonEntity.Path, jsonEntity.Name, service.CloneType)
-				repository := NewRepository(&service, repositoryInfo.URL, jsonEntity.Destination, repositoryInfo.Path, jsonEntity.CloneOptions)
+				repository := NewRepository(&service, repositoryInfo, jsonEntity)
 				UpdateRepositories(&repositories, repository)
 			default:
-				log.Fatalf("%s is not a valid Type", jsonEntity.Type)
+				log.Fatalf("%s is not a valid Type\n", jsonEntity.Type)
 			}
 		}
 		(services)[i].Repositories = repositories
@@ -60,11 +61,11 @@ func UpdateRepositories(repositories *[]Repository, newRepository Repository) {
 	}
 }
 
-func NewRepository(service *Service, URL string, destination string, path string, cloneOptions []Option) Repository {
-	if destination == "" {
-		destination = service.Destination
+func NewRepository(service *Service, repositoryInfo RepositoryInfo, jsonEntity Entity) Repository {
+	if jsonEntity.Destination == "" {
+		jsonEntity.Destination = service.Destination
 	}
-	return Repository{URL, destination + "/" + path, cloneOptions}
+	return Repository{repositoryInfo.URL, jsonEntity.Destination + "/" + repositoryInfo.Path, repositoryInfo.DefaultBranch, jsonEntity.CloneOptions}
 }
 
 func FindRepository(repositories *[]Repository, val string) (int, bool) {

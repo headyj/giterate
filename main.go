@@ -19,7 +19,7 @@ func main() {
 
 	status, err := cli.Run()
 	if err != nil {
-		log.Fatalf("Cannot run command: %s", err)
+		log.Fatalf("Cannot run command: %s\n", err)
 	}
 
 	os.Exit(status)
@@ -44,6 +44,21 @@ func init() {
 		},
 		"status": func() (cli.Command, error) {
 			return &command.StatusCommand{
+				Ui: ui,
+			}, nil
+		},
+		"checkout": func() (cli.Command, error) {
+			return &command.CheckoutCommand{
+				Ui: ui,
+			}, nil
+		},
+		"commit": func() (cli.Command, error) {
+			return &command.CommitCommand{
+				Ui: ui,
+			}, nil
+		},
+		"push": func() (cli.Command, error) {
+			return &command.PushCommand{
 				Ui: ui,
 			}, nil
 		},

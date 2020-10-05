@@ -5,3 +5,4 @@ giterate*
 __debug_bin
 *.json
 *.yaml
+release.sh

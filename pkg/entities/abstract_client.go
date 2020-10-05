@@ -15,8 +15,9 @@ import (
 )
 
 type RepositoryInfo struct {
-	URL  string
-	Path string
+	URL           string
+	Path          string
+	DefaultBranch string
 }
 
 type GitClient interface {
@@ -51,7 +52,7 @@ func (gl GitlabClient) GetGroupRepositories(path string, name string, recurse bo
 	}
 	projects, _, err := gl.Client.Groups.ListGroupProjects(finalPath, &gitlab.ListGroupProjectsOptions{ListOptions: gitlab.ListOptions{PerPage: 10000}, IncludeSubgroups: gitlab.Bool(recurse)})
 	if err != nil {
-		log.Fatalf("Failed to get group %s: %v", finalPath, err)
+		log.Fatalf("Failed to get group %s: %v\n", finalPath, err)
 	}
 	for _, project := range projects {
 		var repositoryLink string
@@ -60,7 +61,7 @@ func (gl GitlabClient) GetGroupRepositories(path string, name string, recurse bo
 		} else {
 			repositoryLink = project.HTTPURLToRepo
 		}
-		repositoryInfo := RepositoryInfo{repositoryLink, project.PathWithNamespace}
+		repositoryInfo := RepositoryInfo{repositoryLink, project.PathWithNamespace, project.DefaultBranch}
 		repositoriesInfo = append(repositoriesInfo, repositoryInfo)
 	}
 	return repositoriesInfo
@@ -69,7 +70,7 @@ func (gl GitlabClient) GetRepository(path string, name string, cloneType string)
 	project, _, err := gl.Client.Projects.GetProject(path+"/"+name, &gitlab.GetProjectOptions{})
 
 	if err != nil {
-		log.Fatalf("Failed to get repository %s: %v", path+"/"+name, err)
+		log.Fatalf("Failed to get repository %s: %v\n", path+"/"+name, err)
 	}
 	var repositoryLink string
 	if cloneType == "ssh" {
@@ -77,7 +78,7 @@ func (gl GitlabClient) GetRepository(path string, name string, cloneType string)
 	} else {
 		repositoryLink = project.HTTPURLToRepo
 	}
-	return RepositoryInfo{repositoryLink, project.PathWithNamespace}
+	return RepositoryInfo{repositoryLink, project.PathWithNamespace, project.DefaultBranch}
 }
 func GitlabAuth(service Service) GitClient {
 	var git *gitlab.Client
@@ -90,7 +91,7 @@ func GitlabAuth(service Service) GitClient {
 		git, err = gitlab.NewClient("", gitlab.WithBaseURL(service.BaseURL+service.APIURI))
 	}
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		log.Fatalf("Failed to create client: %v\n", err)
 	}
 	return GitlabClient{git}
 }
@@ -106,11 +107,11 @@ func (bb BitbucketClient) GetGroupRepositories(path string, name string, recurse
 	}
 	response, err := bb.Client.DefaultApi.GetRepositories(finalPath)
 	if err != nil {
-		log.Fatalf("Failed to get repositories from project %s: %v", path+"/"+name, err)
+		log.Fatalf("Failed to get repositories from project %s: %v\n", path+"/"+name, err)
 	}
 	repositories, err := bitbucketv1.GetRepositoriesResponse(response)
 	if err != nil {
-		log.Fatalf("Cannot get repositories response: %s", err)
+		log.Fatalf("Cannot get repositories response: %s\n", err)
 	}
 	for _, repository := range repositories {
 		var repositoryLink string
@@ -122,7 +123,17 @@ func (bb BitbucketClient) GetGroupRepositories(path string, name string, recurse
 				repositoryLink = links.Href
 			}
 		}
-		repositoryInfo := RepositoryInfo{repositoryLink, repository.Slug}
+		defaultBranch, err := bb.Client.DefaultApi.GetDefaultBranch(repository.Project.Key, repository.Slug)
+		if err != nil {
+			log.Fatalf("Cannot get repository default branch: %s\n", err)
+		}
+		var defaultBranchString = "master"
+		for key, value := range defaultBranch.Values {
+			if key == "displayId" {
+				defaultBranchString = fmt.Sprintf("%v", value.(string))
+			}
+		}
+		repositoryInfo := RepositoryInfo{repositoryLink, repository.Slug, defaultBranchString}
 		repositoriesInfo = append(repositoriesInfo, repositoryInfo)
 	}
 	return repositoriesInfo
@@ -130,11 +141,11 @@ func (bb BitbucketClient) GetGroupRepositories(path string, name string, recurse
 func (bb BitbucketClient) GetRepository(path string, name string, cloneType string) RepositoryInfo {
 	response, err := bb.Client.DefaultApi.GetRepository(path, name)
 	if err != nil {
-		log.Fatalf("Failed to get repositories from project %s: %v", path+"/"+name, err)
+		log.Fatalf("Failed to get repositories from project %s: %v\n", path+"/"+name, err)
 	}
 	repository, err := bitbucketv1.GetRepositoryResponse(response)
 	if err != nil {
-		log.Fatalf("Cannot get repository reponse: %s", err)
+		log.Fatalf("Cannot get repository reponse: %s\n", err)
 	}
 	var repositoryLink string
 	for _, links := range repository.Links.Clone {
@@ -145,7 +156,17 @@ func (bb BitbucketClient) GetRepository(path string, name string, cloneType stri
 			repositoryLink = links.Href
 		}
 	}
-	return RepositoryInfo{repositoryLink, strings.ToLower(repository.Project.Key) + "/" + repository.Slug}
+	defaultBranch, err := bb.Client.DefaultApi.GetDefaultBranch(repository.Project.Key, repository.Slug)
+	if err != nil {
+		log.Fatalf("Cannot get repository default branch: %s\n", err)
+	}
+	var defaultBranchString = "master"
+	for key, value := range defaultBranch.Values {
+		if key == "displayId" {
+			defaultBranchString = fmt.Sprintf("%v", value.(string))
+		}
+	}
+	return RepositoryInfo{repositoryLink, strings.ToLower(repository.Project.Key) + "/" + repository.Slug, defaultBranchString}
 }
 func BitbucketAuth(service Service) GitClient {
 	var git *bitbucketv1.APIClient
@@ -174,7 +195,7 @@ func (gh GithubClient) GetGroupRepositories(path string, name string, recurse bo
 	}
 	response, _, err := gh.Client.Repositories.ListByOrg(context.Background(), finalPath, opt)
 	if err != nil {
-		log.Fatalf("Cannot get repositories response: %s", err)
+		log.Fatalf("Cannot get repositories response: %s\n", err)
 	}
 	for _, repository := range response {
 		var repositoryLink string
@@ -183,7 +204,7 @@ func (gh GithubClient) GetGroupRepositories(path string, name string, recurse bo
 		} else {
 			repositoryLink = repository.GetHTMLURL()
 		}
-		repositoryInfo := RepositoryInfo{repositoryLink, repository.GetFullName()}
+		repositoryInfo := RepositoryInfo{repositoryLink, repository.GetFullName(), repository.GetDefaultBranch()}
 		repositoriesInfo = append(repositoriesInfo, repositoryInfo)
 	}
 	return repositoriesInfo
@@ -191,7 +212,7 @@ func (gh GithubClient) GetGroupRepositories(path string, name string, recurse bo
 func (gh GithubClient) GetRepository(path string, name string, cloneType string) RepositoryInfo {
 	repository, _, err := gh.Client.Repositories.Get(context.Background(), path, name)
 	if err != nil {
-		log.Fatalf("Cannot get repository response: %s", err)
+		log.Fatalf("Cannot get repository response: %s\n", err)
 	}
 	var repositoryLink string
 	if cloneType == "ssh" {
@@ -199,7 +220,7 @@ func (gh GithubClient) GetRepository(path string, name string, cloneType string)
 	} else {
 		repositoryLink = repository.GetHTMLURL()
 	}
-	return RepositoryInfo{repositoryLink, repository.GetFullName()}
+	return RepositoryInfo{repositoryLink, repository.GetFullName(), repository.GetDefaultBranch()}
 }
 func GithubAuth(service Service) GitClient {
 	var git *github.Client
@@ -227,7 +248,7 @@ func (bb BitbucketClientV2) GetRepository(path string, name string, cloneType st
 	repository := bitbucketv2.Repository{Slug: name, Project: project}
 	repository2, err := repository.Get(&bitbucketv2.RepositoryOptions{})
 	if err != nil {
-		log.Fatalf("Cannot get repository response: %s", err)
+		log.Fatalf("Cannot get repository response: %s\n", err)
 	}
 	var repositoryLink string
 	for key, link := range repository2.Links {
@@ -244,13 +265,13 @@ func (bb BitbucketClientV2) GetRepository(path string, name string, cloneType st
 			}
 		}
 	}
-	return RepositoryInfo{repositoryLink, strings.ToLower(repository.Project.Key) + "/" + repository.Slug}
+	return RepositoryInfo{repositoryLink, strings.ToLower(repository.Project.Key) + "/" + repository.Slug, "master"}
 }
 func (bb BitbucketClientV2) GetGroupRepositories(path string, name string, recurse bool, cloneType string) []RepositoryInfo {
 	var repositoriesInfo []RepositoryInfo
 	response, err := bb.Client.Repositories.ListForAccount(&bitbucketv2.RepositoriesOptions{Owner: name})
 	if err != nil {
-		log.Fatalf("Cannot get repositories response: %s", err)
+		log.Fatalf("Cannot get repositories response: %s\n", err)
 	}
 	for _, repository := range response.Items {
 		var repositoryLink string
@@ -268,7 +289,7 @@ func (bb BitbucketClientV2) GetGroupRepositories(path string, name string, recur
 				}
 			}
 		}
-		repositoryInfo := RepositoryInfo{repositoryLink, repository.Slug}
+		repositoryInfo := RepositoryInfo{repositoryLink, repository.Slug, "master"}
 		repositoriesInfo = append(repositoriesInfo, repositoryInfo)
 	}
 	return repositoriesInfo
@@ -278,9 +299,9 @@ func BitbucketV2Auth(service Service) GitClient {
 	if service.Username != "" && service.Password != "" {
 		git = bitbucketv2.NewBasicAuth(service.Username, service.Password)
 	} else if service.APIToken != "" {
-		log.Fatalf("Bitbucket V2 token authentication not implemented")
+		log.Fatalf("Bitbucket V2 token authentication not implemented\n")
 	} else {
-		log.Fatalf("Bitbucket V2 without authentication not implemented")
+		log.Fatalf("Bitbucket V2 without authentication not implemented\n")
 	}
 
 	git.SetApiBaseURL(service.BaseURL + service.APIURI)
