@@ -15,12 +15,13 @@ import (
 
 type PullCommand struct {
 	Ui cli.Ui
-	Arguments
+	entities.Arguments
 }
 
 func (c *PullCommand) Run(args []string) int {
-	file := initConf(c.Arguments.process(args))
-	services := entities.PopulateRepositories(file)
+	arguments := c.Arguments.Process(args)
+	file := initConf(c.Arguments.Process(args))
+	services := entities.PopulateRepositories(file, arguments)
 	Pull(services)
 	return 0
 }
@@ -34,8 +35,10 @@ Usage: giterate pull [options]
     By default, giterate will use config.json or config.yaml file (in this order) in ~/.giterate folder
 
 Options:
-    --config-file        set json/yaml configuration file path
-    --log-level          set log level ("info", "warn", "error", "debug"). default: info
+    -r, --repository path             target one or multiple repositories (chain multiple times)
+    -p, --provider BaseURL or name    target one or multiple providers (chain multiple times)
+    --config-file                     set json/yaml configuration file path
+    --log-level                       set log level (info, warn, error, debug). default: info
 
 `
 	return strings.TrimSpace(helpText)
@@ -66,21 +69,22 @@ func Pull(services []entities.Service) {
 			}
 			r, err := git.PlainOpen(repository.Destination)
 			if err != nil {
-				log.Fatalf("Cannot open repository: %s\n", err)
-			}
-			w, err := r.Worktree()
-			if err != nil {
-				log.Fatalf("Cannot get worktree: %s\n", err)
-			}
-			log.Infof("Pull %s\n", repository.URL)
-			err = w.Pull(&pullOptions)
-			switch err {
-			case git.NoErrAlreadyUpToDate:
-				continue
-			case git.ErrUnstagedChanges:
-				log.Info("Repository contains unstaged changes, ignoring\n")
-			default:
-				log.Errorf("Cannot pull respository: %s. Ignoring\n", err)
+				log.Errorf("Cannot open repository: %s\n", err)
+			} else {
+				w, err := r.Worktree()
+				if err != nil {
+					log.Errorf("Cannot get worktree: %s\n", err)
+				}
+				log.Infof("Pull %s\n", repository.URL)
+				err = w.Pull(&pullOptions)
+				switch err {
+				case git.NoErrAlreadyUpToDate:
+					continue
+				case git.ErrUnstagedChanges:
+					log.Info("Repository contains unstaged changes, ignoring\n")
+				default:
+					log.Errorf("Cannot pull respository: %s. Ignoring\n", err)
+				}
 			}
 		}
 	}

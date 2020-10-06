@@ -16,12 +16,13 @@ import (
 
 type CloneCommand struct {
 	Ui cli.Ui
-	Arguments
+	entities.Arguments
 }
 
 func (c *CloneCommand) Run(args []string) int {
-	file := initConf(c.Arguments.process(args))
-	services := entities.PopulateRepositories(file)
+	arguments := c.Arguments.Process(args)
+	file := initConf(c.Arguments.Process(args))
+	services := entities.PopulateRepositories(file, arguments)
 	Clone(services)
 	//servicesJSON, _ := json.Marshal(services)
 	//fmt.Printf("%s", servicesJSON)
@@ -37,8 +38,10 @@ Usage: giterate clone [options]
     By default, giterate will use config.json or config.yaml file (in this order) in ~/.giterate/ folder
 
 Options:
-    --config-file        set json/yaml configuration file path
-    --log-level          set log level ("info", "warn", "error", "debug"). default: info
+    -r, --repository path             target one or multiple repositories (chain multiple times)
+    -p, --provider BaseURL or name    target one or multiple providers (chain multiple times)
+    --config-file                     set json/yaml configuration file path
+    --log-level                       set log level (info, warn, error, debug). default: info
 
 `
 

@@ -13,7 +13,7 @@ import (
 	"github.com/go-yaml/yaml"
 )
 
-func initConf(arguments *Arguments) []entities.Service {
+func initConf(arguments *entities.Arguments) []entities.Service {
 	var file []byte
 	var err error
 	var configFilePath string

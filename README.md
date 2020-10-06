@@ -6,6 +6,7 @@ By default, giterate will use config.json or config.yaml file (in this order) in
 Each git provider will have the same available parameters:
 
 - BaseURL: Base URL of the git provider
+- Name: Name of the git provider (easier to filter with --provider BaseURL or name)
 - API: Type of api (can be gitlab, bitbucketv1, bitbucketv2 or github)
 - ApiURI: URI of the api
 - ApiToken: API token (required with ssh authentication)
@@ -37,33 +38,48 @@ You can find an example of configuration file on this repository
     - if the repository already exists or is already clone, it will not be updated
     - parameters:
         - [ ] --force: will clean all an recreate from conf
+        - [x] -r, --repository path: target one or multiple repositories (chain multiple times)
+        - [x] -p, --provider BaseURL or name: target one or multiple providers (chain multiple times)
 
 - [x] pull: pull repositories on current branches according to configuration file
     - if a new repository has been added to the configuration/to the git provider, it will not be cloned
 
 - [x] status: check status of each git repositories according to configuration file
     - parameters
-        - [x] --full: show status of all repositories, even if there's no uncommited changes
+        - [x] -f, --full: show status of all repositories, even if there's no uncommited changes
+        - [x] -r, --repository path: target one or multiple repositories (chain multiple times)
+        - [x] -p, --provider BaseURL or name: target one or multiple providers (chain multiple times)
 
 - [x] checkout: checkout the configured/default branch on all repositories
     - parameters
         - [x] --force: reset uncommited changes
+        - [x] -r, --repository path: target one or multiple repositories (chain multiple times)
+        - [x] -p, --provider BaseURL or name: target one or multiple providers (chain multiple times)
 
 - [x] commit: check changes and ask for commit message in case of changes
     - if you don't provide any message, it will go to the next one without commiting
     - parameters
-        - [ ] --target: target one or multiple repositories
         - [ ] -g, --global: define a single message for all commits (you'll have to answer "yes" instead of providing a message)
+        - [x] -r, --repository path: target one or multiple repositories (chain multiple times)
+        - [x] -p, --provider BaseURL or name: target one or multiple providers (chain multiple times)
 
 - [x] push: push commited changes
     - if you don't provide any message, it will go to the next one without commiting
     - parameters
         - [ ] --force: push without asking
-        - [ ] --target: target one or multiple repositories
+        - [x] -r, --repository path: target one or multiple repositories (chain multiple times)
+        - [x] -p, --provider BaseURL or name: target one or multiple providers (chain multiple times)
+
+- [x] providers: list configured providers
+
+- [x] repositories: list configured repositories
+    - parameters
+        - [x] -p, --provider BaseURL or name: target one or multiple providers (chain multiple times)
+
 
 ## Global parameters
 - [x] --config-file: set json/yaml configuration file path
-- [x] --log-level: set log level ("info", "warn", "error", "debug"). default: "info"
+- [x] --log-level: set log level (info, warn, error, debug). default: info
 
 ## Roadmap
 - implement tests

@@ -2,6 +2,7 @@ package entities
 
 type Service struct {
 	BaseURL           string   `json:"BaseURL" yaml:"BaseURL"`
+	Name              string   `json:"Name" yaml:"Name"`
 	API               string   `json:"API" yaml:"API"`
 	APIURI            string   `json:"ApiURI" yaml:"ApiURI"`
 	APIToken          string   `json:"ApiToken" yaml:"ApiToken"`

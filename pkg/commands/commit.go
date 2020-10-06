@@ -15,13 +15,13 @@ import (
 
 type CommitCommand struct {
 	Ui cli.Ui
-	Arguments
+	entities.Arguments
 }
 
 func (c *CommitCommand) Run(args []string) int {
-	arguments := c.Arguments.process(args)
+	arguments := c.Arguments.Process(args)
 	file := initConf(arguments)
-	services := entities.PopulateRepositories(file)
+	services := entities.PopulateRepositories(file, arguments)
 	Commit(services, arguments)
 	//servicesJSON, _ := json.Marshal(services)
 	//fmt.Printf("%s", servicesJSON)
@@ -37,8 +37,10 @@ Usage: giterate commit [options]
     By default, giterate will use config.json or config.yaml file (in this order) in ~/.giterate folder
 
 Options:
-    --config-file        set json/yaml configuration file path
-    --log-level          set log level ("info", "warn", "error", "debug"). default: info
+    -r, --repository path             target one or multiple repositories (chain multiple times)
+    -p, --provider BaseURL or name    target one or multiple providers (chain multiple times)
+    --config-file                     set json/yaml configuration file path
+    --log-level                       set log level (info, warn, error, debug). default: info
 
 
 `
@@ -49,7 +51,7 @@ func (c *CommitCommand) Synopsis() string {
 	return "check changes and ask for commit message in case of changes"
 }
 
-func Commit(services []entities.Service, arguments *Arguments) {
+func Commit(services []entities.Service, arguments *entities.Arguments) {
 	green := color.Style{color.FgLightGreen, color.OpBold}.Render
 	for _, service := range services {
 		for _, repository := range service.Repositories {

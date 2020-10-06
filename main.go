@@ -14,7 +14,7 @@ func main() {
 		Args:     args,
 		Commands: Commands,
 		HelpFunc: cli.BasicHelpFunc("giterate"),
-		Version:  "0.3",
+		Version:  "0.4",
 	}
 
 	status, err := cli.Run()
@@ -59,6 +59,16 @@ func init() {
 		},
 		"push": func() (cli.Command, error) {
 			return &command.PushCommand{
+				Ui: ui,
+			}, nil
+		},
+		"providers": func() (cli.Command, error) {
+			return &command.ProvidersCommand{
+				Ui: ui,
+			}, nil
+		},
+		"repositories": func() (cli.Command, error) {
+			return &command.RepositoriesCommand{
 				Ui: ui,
 			}, nil
 		},

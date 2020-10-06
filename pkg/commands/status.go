@@ -17,13 +17,13 @@ import (
 
 type StatusCommand struct {
 	Ui cli.Ui
-	Arguments
+	entities.Arguments
 }
 
 func (c *StatusCommand) Run(args []string) int {
-	arguments := c.Arguments.process(args)
+	arguments := c.Arguments.Process(args)
 	file := initConf(arguments)
-	services := entities.PopulateRepositories(file)
+	services := entities.PopulateRepositories(file, arguments)
 	Status(services, arguments)
 	return 0
 }
@@ -38,8 +38,8 @@ Usage: giterate status [options]
 
 Options:
     --config-file        set json/yaml configuration file path
-    --full               show status of all repositories, even if there's no uncommited changes
-    --log-level          set log level ("info", "warn", "error", "debug"). default: info
+    -f, --full           show status of all repositories, even if there's no uncommited changes
+    --log-level          set log level (info, warn, error, debug). default: info
 
 `
 	return strings.TrimSpace(helpText)
@@ -49,7 +49,7 @@ func (c *StatusCommand) Synopsis() string {
 	return "get the status of all repositories"
 }
 
-func Status(services []entities.Service, arguments *Arguments) {
+func Status(services []entities.Service, arguments *entities.Arguments) {
 	green := color.Style{color.FgLightGreen, color.OpBold}.Render
 	for _, service := range services {
 		var pullOptions = git.PullOptions{RemoteName: "origin", Progress: os.Stdout}
@@ -68,20 +68,21 @@ func Status(services []entities.Service, arguments *Arguments) {
 		for _, repository := range service.Repositories {
 			r, err := git.PlainOpen(repository.Destination)
 			if err != nil {
-				log.Fatalf("Cannot open repository: %s\n", err)
-			}
-			w, err := r.Worktree()
-			if err != nil {
-				log.Fatalf("Cannot get worktree: %s\n", err)
-			}
-			head, _ := r.Head()
-			currentBranch := head.Name()
-			status, err := w.Status()
-			if err != nil {
-				log.Fatalf("Cannot get repository status: %s\n", err)
-			}
-			if arguments.Full || !status.IsClean() {
-				fmt.Printf("\n\n%s: %s\n%s: %s\n%s:\n%s\n", green("Repository"), repository.Destination, green("Branch"), currentBranch.Short(), green("Changes"), status.String())
+				log.Debugf("Cannot open repository: %s\n. Ignoring", err)
+			} else {
+				w, err := r.Worktree()
+				if err != nil {
+					log.Fatalf("Cannot get worktree: %s\n", err)
+				}
+				head, _ := r.Head()
+				currentBranch := head.Name()
+				status, err := w.Status()
+				if err != nil {
+					log.Fatalf("Cannot get repository status: %s\n", err)
+				}
+				if arguments.Full || !status.IsClean() {
+					fmt.Printf("\n\n%s: %s\n%s: %s\n%s:\n%s\n", green("Repository"), repository.Destination, green("Branch"), currentBranch.Short(), green("Changes"), status.String())
+				}
 			}
 		}
 	}
