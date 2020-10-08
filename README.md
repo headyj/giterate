@@ -53,29 +53,29 @@ You can find an example of configuration file on this repository
         - [x] **-r, --repository path**: target one or multiple repositories (chain multiple times)
         - [x] **-p, --provider _base URL or name_**: target one or multiple providers (chain multiple times)
 
-- [x] checkout: checkout the configured/default branch on all repositories
+- [x] **checkout**: checkout the configured/default branch on all repositories
     - parameters
         - [x] **--force**: reset uncommited changes
         - [x] **-r, --repository path**: target one or multiple repositories (chain multiple times)
         - [x] **-p, --provider _base URL or name_**: target one or multiple providers (chain multiple times)
 
-- [x] commit: check changes and ask for commit message in case of changes
+- [x] **commit**: check changes and ask for commit message in case of changes
     - if you don't provide any message, it will go to the next one without commiting
     - parameters
         - [ ] **-g, --global**: define a single message for all commits (you'll have to answer "yes" instead of providing a message)
         - [x] **-r, --repository path**: target one or multiple repositories (chain multiple times)
         - [x] **-p, --provider _base URL or name_**: target one or multiple providers (chain multiple times)
 
-- [x] push: push commited changes
+- [x] **push**: push commited changes
     - if you don't provide any message, it will go to the next one without commiting
     - parameters
         - [ ] **--force**: push without asking
         - [x] **-r, --repository path**: target one or multiple repositories (chain multiple times)
         - [x] **-p, --provider _base URL or name_**: target one or multiple providers (chain multiple times)
 
-- [x] providers: list configured providers
+- [x] **providers**: list configured providers
 
-- [x] repositories: list configured repositories
+- [x] **repositories**: list configured repositories
     - parameters
         - [x] **-p, --provider _base URL or name_**: target one or multiple providers (chain multiple times)
 
@@ -86,13 +86,19 @@ You can find an example of configuration file on this repository
 
 ## Examples
 Basic clone command
-`giterate clone`
+```bash
+giterate clone
+```
 
 Use alternative config file
-`giterate clone --config-file ~/giterate-config.json`
+```bash
+giterate clone --config-file ~/giterate-config.json
+```
 
 Pull from a specific provider name from the configuration file
-`giterate pull --provider gitlab-mycompany`
+```bash
+giterate pull --provider gitlab-mycompany
+```
 
 Get the status of a specific provider URL from the configuration file
 ```bash
