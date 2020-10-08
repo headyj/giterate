@@ -68,12 +68,13 @@ func Clone(services []entities.Service) {
 			}
 		}
 		for _, repository := range service.Repositories {
-			cloneOptions.URL = repository.URL
+			rCloneOptions := cloneOptions
+			rCloneOptions.URL = repository.URL
 			if repository.CloneOptions != nil {
-				entities.ProcessCloneOptions(&repository.CloneOptions, &cloneOptions)
+				entities.ProcessCloneOptions(&repository.CloneOptions, &rCloneOptions)
 			}
 			log.Infof("Cloning %s...\n", repository.URL)
-			_, err := git.PlainClone(repository.Destination, false, &cloneOptions)
+			_, err := git.PlainClone(repository.Destination, false, &rCloneOptions)
 			if err != nil {
 				if err == transport.ErrEmptyRemoteRepository || err == git.ErrRepositoryAlreadyExists {
 					log.Info("Repository already cloned, ignoring...\n")
