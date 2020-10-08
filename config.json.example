@@ -7,6 +7,12 @@
 		"CloneType": "ssh",
 		"SSHPrivateKeyPath": "/home/usr/.ssh/id_rsa",
 		"Destination": "/home/usr/giterate/gitlab",
+		"CloneOptions": [
+			{
+				"Name": "RemoteName",
+				"Value": "develop"
+			}
+		],
 		"Entities": [
 			{
 				"Type": "repository",

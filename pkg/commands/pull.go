@@ -69,7 +69,7 @@ func Pull(services []entities.Service) {
 			}
 			r, err := git.PlainOpen(repository.Destination)
 			if err != nil {
-				log.Errorf("Cannot open repository: %s\n", err)
+				log.Debugf("Cannot open repository: %s, ignoring\n", err)
 			} else {
 				w, err := r.Worktree()
 				if err != nil {

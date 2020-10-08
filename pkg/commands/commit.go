@@ -57,31 +57,32 @@ func Commit(services []entities.Service, arguments *entities.Arguments) {
 		for _, repository := range service.Repositories {
 			r, err := git.PlainOpen(repository.Destination)
 			if err != nil {
-				log.Fatalf("Cannot open repository: %s\n", err)
-			}
-			w, err := r.Worktree()
-			if err != nil {
-				log.Fatalf("Cannot get worktree: %s\n", err)
-			}
-			head, _ := r.Head()
-			currentBranch := head.Name()
-			status, err := w.Status()
-			if err != nil {
-				log.Fatalf("Cannot get status: %s\n", err)
-			}
-			if !status.IsClean() {
-				reader := bufio.NewReader(os.Stdin)
-				fmt.Printf("\n\n%s: %s\n%s: %s\n%s:\n%s\nEnter commit message (let empty to ignore):", green("Repository"), repository.Destination, green("Branch"), currentBranch.Short(), green("Changes"), status.String())
-				commitMsg, _ := reader.ReadString('\n')
-				if commitMsg != "\n" {
-					_, err = w.Add(".")
-					commit, err := w.Commit(commitMsg, &git.CommitOptions{})
-					if err != nil {
-						log.Fatalf("Cannot commit to repository: %s\n", err)
-					}
-					_, err = r.CommitObject(commit)
-					if err != nil {
-						log.Fatalf("Cannot commit to repository: %s\n", err)
+				log.Debugf("Cannot open repository: %s, ignoring\n", err)
+			} else {
+				w, err := r.Worktree()
+				if err != nil {
+					log.Fatalf("Cannot get worktree: %s\n", err)
+				}
+				head, _ := r.Head()
+				currentBranch := head.Name()
+				status, err := w.Status()
+				if err != nil {
+					log.Fatalf("Cannot get status: %s\n", err)
+				}
+				if !status.IsClean() {
+					reader := bufio.NewReader(os.Stdin)
+					fmt.Printf("\n\n%s: %s (%s)\n%s: %s\n%s:\n%s\nEnter commit message (let empty to ignore):", green("Repository"), repository.URL, repository.Destination, green("Branch"), currentBranch.Short(), green("Changes"), status.String())
+					commitMsg, _ := reader.ReadString('\n')
+					if commitMsg != "\n" {
+						_, err = w.Add(".")
+						commit, err := w.Commit(commitMsg, &git.CommitOptions{})
+						if err != nil {
+							log.Fatalf("Cannot commit to repository: %s\n", err)
+						}
+						_, err = r.CommitObject(commit)
+						if err != nil {
+							log.Fatalf("Cannot commit to repository: %s\n", err)
+						}
 					}
 				}
 			}

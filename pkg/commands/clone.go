@@ -67,6 +67,9 @@ func Clone(services []entities.Service) {
 				Password: service.Password,
 			}
 		}
+		if service.CloneOptions != nil {
+			entities.ProcessCloneOptions(&service.CloneOptions, &cloneOptions)
+		}
 		for _, repository := range service.Repositories {
 			rCloneOptions := cloneOptions
 			rCloneOptions.URL = repository.URL

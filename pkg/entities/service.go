@@ -13,4 +13,5 @@ type Service struct {
 	Destination       string   `json:"Destination" yaml:"Destination"`
 	Entities          []Entity `json:"Entities" yaml:"Entities"`
 	Repositories      []Repository
+	CloneOptions      []Option `json:"CloneOptions" yaml:"CloneOptions"`
 }

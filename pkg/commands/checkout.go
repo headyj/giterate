@@ -65,7 +65,7 @@ func Checkout(services []entities.Service, arguments *entities.Arguments) {
 			}
 			r, err := git.PlainOpen(repository.Destination)
 			if err != nil {
-				log.Infof("Cannot open repository: %s, ignoring\n", err)
+				log.Debugf("Cannot open repository: %s, ignoring\n", err)
 			} else {
 				w, err := r.Worktree()
 				if err != nil {

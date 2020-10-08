@@ -68,7 +68,7 @@ func Status(services []entities.Service, arguments *entities.Arguments) {
 		for _, repository := range service.Repositories {
 			r, err := git.PlainOpen(repository.Destination)
 			if err != nil {
-				log.Debugf("Cannot open repository: %s\n. Ignoring", err)
+				log.Debugf("Cannot open repository: %s, Ignoring\n", err)
 			} else {
 				w, err := r.Worktree()
 				if err != nil {
@@ -81,7 +81,7 @@ func Status(services []entities.Service, arguments *entities.Arguments) {
 					log.Fatalf("Cannot get repository status: %s\n", err)
 				}
 				if arguments.Full || !status.IsClean() {
-					fmt.Printf("\n\n%s: %s\n%s: %s\n%s:\n%s\n", green("Repository"), repository.Destination, green("Branch"), currentBranch.Short(), green("Changes"), status.String())
+					fmt.Printf("\n%s: %s (%s)\n%s: %s\n%s:\n%s\n", green("Repository"), repository.URL, repository.Destination, green("Branch"), currentBranch.Short(), green("Changes"), status.String())
 				}
 			}
 		}
