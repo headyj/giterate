@@ -76,7 +76,7 @@ func Status(services []entities.Service, arguments *entities.Arguments) {
 				} else {
 					head, err := r.Head()
 					if err != nil {
-						log.Debzgf("Cannot get repository HEAD reference: %s\n, ignoring", err)
+						log.Debugf("Cannot get repository HEAD reference: %s\n, ignoring", err)
 					} else {
 						currentBranch := head.Name()
 						status, err := w.Status()
