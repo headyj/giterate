@@ -23,8 +23,6 @@ func (c *CommitCommand) Run(args []string) int {
 	file := initConf(arguments)
 	services := entities.PopulateRepositories(file, arguments)
 	Commit(services, arguments)
-	//servicesJSON, _ := json.Marshal(services)
-	//fmt.Printf("%s", servicesJSON)
 	return 0
 }
 
@@ -63,7 +61,10 @@ func Commit(services []entities.Service, arguments *entities.Arguments) {
 				if err != nil {
 					log.Fatalf("Cannot get worktree: %s\n", err)
 				}
-				head, _ := r.Head()
+				head, err := r.Head()
+				if err != nil {
+					log.Fatalf("Cannot get repository HEAD reference: %s\n", err)
+				}
 				currentBranch := head.Name()
 				status, err := w.Status()
 				if err != nil {
@@ -72,7 +73,10 @@ func Commit(services []entities.Service, arguments *entities.Arguments) {
 				if !status.IsClean() {
 					reader := bufio.NewReader(os.Stdin)
 					fmt.Printf("\n\n%s: %s (%s)\n%s: %s\n%s:\n%s\nEnter commit message (let empty to ignore):", green("Repository"), repository.URL, repository.Destination, green("Branch"), currentBranch.Short(), green("Changes"), status.String())
-					commitMsg, _ := reader.ReadString('\n')
+					commitMsg, err := reader.ReadString('\n')
+					if err != nil {
+						log.Fatalf("Cannot read commit message: %s\n", err)
+					}
 					if commitMsg != "\n" {
 						_, err = w.Add(".")
 						commit, err := w.Commit(commitMsg, &git.CommitOptions{})

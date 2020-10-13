@@ -69,21 +69,22 @@ func Pull(services []entities.Service) {
 			}
 			r, err := git.PlainOpen(repository.Destination)
 			if err != nil {
-				log.Debugf("Cannot open repository: %s, ignoring\n", err)
+				log.Errorf("Cannot open repository: %s, ignoring\n", err)
 			} else {
 				w, err := r.Worktree()
 				if err != nil {
-					log.Errorf("Cannot get worktree: %s\n", err)
-				}
-				log.Infof("Pull %s\n", repository.URL)
-				err = w.Pull(&pullOptions)
-				switch err {
-				case git.NoErrAlreadyUpToDate:
-					continue
-				case git.ErrUnstagedChanges:
-					log.Info("Repository contains unstaged changes, ignoring\n")
-				default:
-					log.Errorf("Cannot pull respository: %s. Ignoring\n", err)
+					log.Errorf("Cannot get worktree: %s, ignoring\n", err)
+				} else {
+					log.Infof("Pull %s\n", repository.URL)
+					err = w.Pull(&pullOptions)
+					switch err {
+					case git.NoErrAlreadyUpToDate:
+						continue
+					case git.ErrUnstagedChanges:
+						log.Info("Repository contains unstaged changes, ignoring\n")
+					default:
+						log.Errorf("Cannot pull respository: %s, ignoring\n", err)
+					}
 				}
 			}
 		}

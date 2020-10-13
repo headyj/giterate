@@ -24,8 +24,6 @@ func (c *PushCommand) Run(args []string) int {
 	file := initConf(c.Arguments.Process(args))
 	services := entities.PopulateRepositories(file, arguments)
 	Push(services)
-	//servicesJSON, _ := json.Marshal(services)
-	//fmt.Printf("%s", servicesJSON)
 	return 0
 }
 

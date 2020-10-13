@@ -53,7 +53,7 @@ func Repositories(services []entities.Service, arguments *entities.Arguments) {
 			fmt.Printf("%s\n", green(service.BaseURL))
 		}
 		for _, repository := range service.Repositories {
-			fmt.Printf("    - %s\n", green(repository.Destination))
+			fmt.Printf("    - %s (%s)\n", green(repository.URL), green(repository.Destination))
 		}
 	}
 }

@@ -22,8 +22,6 @@ func (c *CheckoutCommand) Run(args []string) int {
 	file := initConf(arguments)
 	services := entities.PopulateRepositories(file, arguments)
 	Checkout(services, arguments)
-	//servicesJSON, _ := json.Marshal(services)
-	//fmt.Printf("%s", servicesJSON)
 	return 0
 }
 
@@ -65,22 +63,27 @@ func Checkout(services []entities.Service, arguments *entities.Arguments) {
 			}
 			r, err := git.PlainOpen(repository.Destination)
 			if err != nil {
-				log.Debugf("Cannot open repository: %s, ignoring\n", err)
+				log.Errorf("Cannot open repository: %s, ignoring\n", err)
 			} else {
 				w, err := r.Worktree()
 				if err != nil {
-					log.Fatalf("Cannot get worktree: %s\n", err)
-				}
-				log.Infof("Checkout branch %s for %s\n", checkoutOptions.Branch.String(), repository.URL)
-				err = w.Checkout(&checkoutOptions)
-				if err != nil {
-					switch err {
-					case git.ErrUnstagedChanges:
-						log.Info("Worktree contains unstaged changes, ignoring\n")
-					default:
-						log.Infof("Cannot checkout branch: %s. Ignoring\n", err)
-						headRef, _ := r.Head()
-						fmt.Println(headRef)
+					log.Errorf("Cannot get worktree: %s, ignoring\n", err)
+				} else {
+					log.Infof("Checkout branch %s for %s\n", checkoutOptions.Branch.String(), repository.URL)
+					err = w.Checkout(&checkoutOptions)
+					if err != nil {
+						switch err {
+						case git.ErrUnstagedChanges:
+							log.Info("Worktree contains unstaged changes, ignoring\n")
+						default:
+							log.Errorf("Cannot checkout branch: %s, ignoring\n", err)
+							headRef, err := r.Head()
+							if err != nil {
+								log.Errorf("Cannot get repository HEAD reference: %s\n, Ignoring", err)
+							} else {
+								fmt.Println(headRef)
+							}
+						}
 					}
 				}
 			}

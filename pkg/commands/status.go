@@ -68,20 +68,26 @@ func Status(services []entities.Service, arguments *entities.Arguments) {
 		for _, repository := range service.Repositories {
 			r, err := git.PlainOpen(repository.Destination)
 			if err != nil {
-				log.Debugf("Cannot open repository: %s, Ignoring\n", err)
+				log.Debug("Cannot open repository: %s, ignoring\n", err)
 			} else {
 				w, err := r.Worktree()
 				if err != nil {
-					log.Fatalf("Cannot get worktree: %s\n", err)
-				}
-				head, _ := r.Head()
-				currentBranch := head.Name()
-				status, err := w.Status()
-				if err != nil {
-					log.Fatalf("Cannot get repository status: %s\n", err)
-				}
-				if arguments.Full || !status.IsClean() {
-					fmt.Printf("\n%s: %s (%s)\n%s: %s\n%s:\n%s\n", green("Repository"), repository.URL, repository.Destination, green("Branch"), currentBranch.Short(), green("Changes"), status.String())
+					log.Debugf("Cannot get worktree: %s\n, ignoring", err)
+				} else {
+					head, err := r.Head()
+					if err != nil {
+						log.Debzgf("Cannot get repository HEAD reference: %s\n, ignoring", err)
+					} else {
+						currentBranch := head.Name()
+						status, err := w.Status()
+						if err != nil {
+							log.Debugf("Cannot get repository status: %s\n, ignoring", err)
+						} else {
+							if arguments.Full || !status.IsClean() {
+								fmt.Printf("\n%s: %s (%s)\n%s: %s\n%s:\n%s\n", green("Repository"), repository.URL, repository.Destination, green("Branch"), currentBranch.Short(), green("Changes"), status.String())
+							}
+						}
+					}
 				}
 			}
 		}

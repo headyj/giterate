@@ -6,6 +6,9 @@
   CloneType: ssh
   SSHPrivateKeyPath: "/home/usr/.ssh/id_rsa"
   Destination: "/home/usr/giterate/gitlab"
+  CloneOptions:
+    - Name: RemoteName
+      Value: master
   Entities:
   - Type: repository
     Path: link/to/repository

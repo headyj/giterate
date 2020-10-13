@@ -39,8 +39,10 @@ func initConf(arguments *entities.Arguments) []entities.Service {
 			configFilePath = usr.HomeDir + "/" + ".giterate/config.json"
 		}
 	}
-	file, _ = ioutil.ReadFile(configFilePath)
-
+	file, err = ioutil.ReadFile(configFilePath)
+	if err != nil {
+		log.Fatalf("Cannot read configuration file:%s\n", err)
+	}
 	var services []entities.Service
 	if filepath.Ext(configFilePath) == ".yaml" {
 		err = yaml.Unmarshal(file, &services)
