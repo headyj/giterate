@@ -70,6 +70,25 @@ func ProcessPullOptions(options *[]Option, pullOptions *git.PullOptions) {
 		}
 	}
 }
+func ProcessFetchOptions(options *[]Option, fetchOptions *git.FetchOptions) {
+	var err error
+	for _, option := range *options {
+		switch option.Name {
+		case "RemoteName":
+			fetchOptions.RemoteName = option.Value
+		case "Depth":
+			i, err := strconv.ParseInt(option.Value, 10, 32)
+			if err != nil {
+				log.Fatalf("Cannot get Depth value: %s\n", err)
+			}
+			fetchOptions.Depth = int(i)
+		default:
+		}
+		if err != nil {
+			log.Fatalf("Cannot get %s value: %s\n", option.Name, err)
+		}
+	}
+}
 func ProcessCheckoutOptions(options *[]Option, checkoutOptions *git.CheckoutOptions) {
 	for _, option := range *options {
 		switch option.Name {

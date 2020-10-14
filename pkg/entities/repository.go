@@ -107,6 +107,9 @@ func FindRepositoryArgs(repoArgs *[]string, repository *Repository) (int, bool) 
 		if repository.Destination == repoArg {
 			return i, true
 		}
+		if repository.URL == repoArg {
+			return i, true
+		}
 	}
 	return -1, false
 }

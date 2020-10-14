@@ -41,36 +41,43 @@ You can find an example of configuration file on this repository
     - if the repository already exists or is already clone, it will not be updated
     - parameters:
         - [ ] **--force**: will clean all an recreate from conf
-        - [x] **-r, --repository _path_**: target one or multiple repositories (chain multiple times)
+        - [x] **-r, --repository _URL or path_**: target one or multiple repositories (chain multiple times)
         - [x] **-p, --provider _base URL or name_**: target one or multiple providers (chain multiple times)
 
 - [x] **pull**: pull repositories on current branches according to configuration file
-    - if a new repository has been added to the configuration/to the git provider, it will not be cloned
+    - parameters
+        - [x] **-r, --repository _URL or path_**: target one or multiple repositories (chain multiple times)
+        - [x] **-p, --provider _base URL or name_**: target one or multiple providers (chain multiple times)
+
+- [x] **fetch**: fetch repositories on current branches according to configuration file
+    - parameters
+        - [x] **-r, --repository _URL or path_**: target one or multiple repositories (chain multiple times)
+        - [x] **-p, --provider _base URL or name_**: target one or multiple providers (chain multiple times)
 
 - [x] **status**: check status of each git repositories according to configuration file
     - parameters
         - [x] -**f, --full**: show status of all repositories, even if there's no uncommited changes
-        - [x] **-r, --repository path**: target one or multiple repositories (chain multiple times)
+        - [x] **-r, --repository _URL or path_**: target one or multiple repositories (chain multiple times)
         - [x] **-p, --provider _base URL or name_**: target one or multiple providers (chain multiple times)
 
 - [x] **checkout**: checkout the configured/default branch on all repositories
     - parameters
         - [x] **--force**: reset uncommited changes
-        - [x] **-r, --repository path**: target one or multiple repositories (chain multiple times)
+        - [x] **-r, --repository _URL or path_**: target one or multiple repositories (chain multiple times)
         - [x] **-p, --provider _base URL or name_**: target one or multiple providers (chain multiple times)
 
 - [x] **commit**: check changes and ask for commit message in case of changes
     - if you don't provide any message, it will go to the next one without commiting
     - parameters
         - [ ] **-g, --global**: define a single message for all commits (you'll have to answer "yes" instead of providing a message)
-        - [x] **-r, --repository path**: target one or multiple repositories (chain multiple times)
+        - [x] **-r, --repository _URL or path_**: target one or multiple repositories (chain multiple times)
         - [x] **-p, --provider _base URL or name_**: target one or multiple providers (chain multiple times)
 
 - [x] **push**: push commited changes
     - if you don't provide any message, it will go to the next one without commiting
     - parameters
         - [ ] **--force**: push without asking
-        - [x] **-r, --repository path**: target one or multiple repositories (chain multiple times)
+        - [x] **-r, --repository _URL or path_**: target one or multiple repositories (chain multiple times)
         - [x] **-p, --provider _base URL or name_**: target one or multiple providers (chain multiple times)
 
 - [x] **providers**: list configured providers
