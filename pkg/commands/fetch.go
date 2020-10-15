@@ -20,7 +20,7 @@ type FetchCommand struct {
 
 func (c *FetchCommand) Run(args []string) int {
 	arguments := c.Arguments.Process(args)
-	file := initConf(c.Arguments.Process(args))
+	file := initConf(arguments)
 	services := entities.PopulateRepositories(file, arguments)
 	Fetch(services)
 	return 0

@@ -1,9 +1,9 @@
 package command
 
 import (
-	"fmt"
 	"giterate/pkg/entities"
 	"os"
+	"os/exec"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -14,74 +14,68 @@ import (
 	"github.com/mitchellh/cli"
 )
 
-type PushCommand struct {
+type ExecCommand struct {
 	Ui cli.Ui
 	entities.Arguments
 }
 
-func (c *PushCommand) Run(args []string) int {
+func (c *ExecCommand) Run(args []string) int {
 	arguments := c.Arguments.Process(args)
 	file := initConf(arguments)
 	services := entities.PopulateRepositories(file, arguments)
-	Push(services)
+	Exec(services, arguments)
 	return 0
 }
 
-func (c *PushCommand) Help() string {
+func (c *ExecCommand) Help() string {
 	helpText := `
-Usage: giterate push [options]
+Usage: giterate exec [options]
 
-    Push commited changes
+    Execute a custom git command
 
-    By default, giterate will use config.json or config.yaml file (in this order) in ~/.giterate/ folder
+    By default, giterate will use config.json or config.yaml file (in this order) in ~/.giterate folder
 
 Options:
+    -c, --command                     quoted command to be executed
     -r, --repository path             target one or multiple repositories (chain multiple times)
     -p, --provider BaseURL or name    target one or multiple providers (chain multiple times)
     --config-file                     set json/yaml configuration file path
     --log-level                       set log level (info, warn, error, debug). default: info
 
 `
-
 	return strings.TrimSpace(helpText)
 }
 
-func (c *PushCommand) Synopsis() string {
-	return "push commited changes"
+func (c *ExecCommand) Synopsis() string {
+	return "pull repositories on current branches"
 }
 
-func Push(services []entities.Service) {
+func Exec(services []entities.Service, arguments *entities.Arguments) {
 	for _, service := range services {
-		var pushOptions = git.PushOptions{Progress: os.Stdout}
+		var pullOptions = git.PullOptions{Progress: os.Stdout}
 		if service.SSHPrivateKeyPath != "" {
-			fmt.Println("ssh login")
 			publicKeys, err := ssh.NewPublicKeysFromFile("git", service.SSHPrivateKeyPath, "")
 			if err != nil {
 				log.Fatalf("Cannot get public key: %s\n", err)
 			}
-			pushOptions.Auth = publicKeys
+			pullOptions.Auth = publicKeys
 		} else if service.Username != "" && service.Password != "" {
-			pushOptions.Auth = &http.BasicAuth{
+			pullOptions.Auth = &http.BasicAuth{
 				Username: service.Username,
 				Password: service.Password,
 			}
 		}
 		for _, repository := range service.Repositories {
-			r, err := git.PlainOpen(repository.Destination)
-			if repository.CloneOptions != nil {
-				entities.ProcessPushOptions(&repository.CloneOptions, &pushOptions)
+			if len(arguments.Command) == 0 {
+				log.Fatalf("Command is empty")
 			}
-			err = r.Push(&pushOptions)
+			log.Infof("Execute command %s on %s\n", arguments.Command, repository.URL)
+			cmd := exec.Command("git", arguments.Command...)
+			cmd.Dir = repository.Destination
+			err := cmd.Run()
 			if err != nil {
-				switch err {
-				case git.NoErrAlreadyUpToDate:
-					continue
-				default:
-					log.Errorf("Cannot push to repository: %s\n", err)
-				}
+				log.Errorf("Cannot execute command: %s, ignoring\n", err)
 			}
-
-			log.Infof("Pushed %s\n", repository.URL)
 		}
 	}
 }

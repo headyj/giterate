@@ -20,7 +20,7 @@ type PullCommand struct {
 
 func (c *PullCommand) Run(args []string) int {
 	arguments := c.Arguments.Process(args)
-	file := initConf(c.Arguments.Process(args))
+	file := initConf(arguments)
 	services := entities.PopulateRepositories(file, arguments)
 	Pull(services)
 	return 0

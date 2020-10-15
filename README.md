@@ -1,7 +1,27 @@
-# Project
-Giterate is a wrapper that allows you to clone and pull multiple repositories from multiple providers with a single command
+# Giterate
 
-## Configuration
+ 1. [Overview](#overview)
+ 1. [Installation](#installation)
+ 1. [Configuration](#configuration)
+ 1. [Usage](#usage)
+ 1. [Examples](#examples)
+ 1. [Roadmap](#roadmap)
+
+## Overview <a name="overview"></a>
+Giterate is a wrapper that will help you to easily deal with multiple git repositories from multiple sources.
+
+With Giterate, you can:
+- recursively clone repositories accross gitlab groups / bitbucket projects according to JSON or YAML configuration file
+- execute almost all git commands on all (or filtered subset of) repositories
+- execute custom git commands
+
+## Installation <a name="installation"></a>
+### Binaries
+- Download the [latest release](https://github.com/headyj/giterate/releases) binary corresponding to your system
+- <ins>For Linux</ins>: put the binary somewhere on your path (example: /usr/bin)
+- <ins>For Windows</ins>: put the binary somewhere on your computer (example: C:/giterate) and [update the path variable](https://www.architectryan.com/2018/03/17/add-to-the-path-on-windows-10/)
+
+## Configuration <a name="configuration"></a>
 By default, giterate will use config.json or config.yaml file (in this order) in ~/.giterate folder
 Each git provider will have the same available parameters:
 
@@ -30,13 +50,8 @@ Each git provider will have the same available parameters:
 
 You can find an example of configuration file on this repository
 
-## Available services
-- Gitlab (https://www.github.com/xanzy/go-gitlab)
-- Bitbucket V1 (https://www.github.com/gfleury/go-bitbucket-v1)
-- Bitbucket V2 (https://www.github.com/ktrysmt/go-bitbucket)
-- Github (https://www.github.com/google/go-github/github)
-
-## Available commands
+## Usage <a name="usage"></a>
+### Available commands
 - [x] **clone**: clone repositories according to configuration file
     - if the repository already exists or is already clone, it will not be updated
     - parameters:
@@ -86,12 +101,23 @@ You can find an example of configuration file on this repository
     - parameters
         - [x] **-p, --provider _base URL or name_**: target one or multiple providers (chain multiple times)
 
+- [x] **exec**: execute a custom git command
+    - parameters
+        - [x] **-c, --command  _'command'_** : command to be executed
+        - [x] **-r, --repository _URL or path_**: target one or multiple repositories (chain multiple times)
+        - [x] **-p, --provider _base URL or name_**: target one or multiple providers (chain multiple times)
 
-## Global parameters
+### Global parameters
 - [x] **--config-file**: set json/yaml configuration file path
 - [x] **--log-level**: set log level (info, warn, error, debug). default: info
 
-## Examples
+### Available services
+- Gitlab (https://www.github.com/xanzy/go-gitlab)
+- Bitbucket V1 (https://www.github.com/gfleury/go-bitbucket-v1)
+- Bitbucket V2 (https://www.github.com/ktrysmt/go-bitbucket)
+- Github (https://www.github.com/google/go-github/github)
+
+## Examples <a name="examples"></a>
 Basic clone command
 ```bash
 giterate clone
@@ -145,6 +171,11 @@ Changes:
 Enter commit message (let empty to ignore): update json configuration for other_repo
 ```
 
-## Roadmap
+Execute a custom command on a subset of repositories
+```bash
+giterate exec -c 'reset --hard' -r /home/usr/giterate/bitbucketv1/repo1 -r /home/usr/giterate/bitbucketv1/repo2
+```
+
+## Roadmap <a name="roadmap"></a>
 - implement tests
 - implement parameters

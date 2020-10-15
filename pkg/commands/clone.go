@@ -21,11 +21,9 @@ type CloneCommand struct {
 
 func (c *CloneCommand) Run(args []string) int {
 	arguments := c.Arguments.Process(args)
-	file := initConf(c.Arguments.Process(args))
+	file := initConf(arguments)
 	services := entities.PopulateRepositories(file, arguments)
 	Clone(services)
-	//servicesJSON, _ := json.Marshal(services)
-	//fmt.Printf("%s", servicesJSON)
 	return 0
 }
 

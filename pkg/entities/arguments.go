@@ -1,5 +1,9 @@
 package entities
 
+import (
+	"strings"
+)
+
 type Arguments struct {
 	ConfigFile   string
 	Full         bool
@@ -7,6 +11,7 @@ type Arguments struct {
 	LogLevel     string
 	Providers    []string
 	Repositories []string
+	Command      []string
 }
 
 func (a *Arguments) Process(args []string) *Arguments {
@@ -24,8 +29,9 @@ func (a *Arguments) Process(args []string) *Arguments {
 			a.Providers = append(a.Providers, args[i+1])
 		case "--repository", "-r":
 			a.Repositories = append(a.Repositories, args[i+1])
+		case "--command", "-c":
+			a.Command = strings.Fields(args[i+1])
 		}
 	}
 	return a
-
 }

@@ -77,5 +77,10 @@ func init() {
 				Ui: ui,
 			}, nil
 		},
+		"exec": func() (cli.Command, error) {
+			return &command.ExecCommand{
+				Ui: ui,
+			}, nil
+		},
 	}
 }
